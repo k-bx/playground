@@ -33,7 +33,7 @@ subset X =
   Σ[ a ∈ X ]
   (P a)
 
-subset-alt : ∀ (X : Set) → ∀ (P : (X → Set)) → Set
+subset-alt : (X : Set) → (P : (X → Set)) → Set
 subset-alt X P =
   Σ[ a ∈ X ] (P a)
 
@@ -44,6 +44,11 @@ allSubsets X =
   Σ[ P ∈ (X → Set) ]
   Σ[ a ∈ X ]
   (P a)
+
+allSubsets-alt : Set → Set₁
+allSubsets-alt X =
+  Σ[ P ∈ (X → Set) ]
+  subset-alt X P
 
 isTopology : Set → Set₁
 isTopology X =
