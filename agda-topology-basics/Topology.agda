@@ -24,6 +24,21 @@ data Ø : Set where
 
 data P₀ : Set → Set where
 
+-- subset : (X : Set) → (X → Set) → Set₁
+-- subset X P = Σ[ a ∈ X ] (P a)
+
+subset : Set → Set₁
+subset X =
+  ∀ (P : (X → Set)) →
+  Σ[ a ∈ X ]
+  (P a)
+
+subset-alt : ∀ (X : Set) → ∀ (P : (X → Set)) → Set
+subset-alt X P =
+  Σ[ a ∈ X ] (P a)
+
+-- TODO: why one is Set₁ and another is Set
+
 allSubsets : Set → Set₁
 allSubsets X =
   Σ[ P ∈ (X → Set) ]
