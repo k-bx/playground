@@ -21,8 +21,8 @@ open import Data.Product public using (Σ; Σ-syntax; _×_; _,_; proj₁; proj�
 -- So first, a set of all subsets of a type is:
 
 data Ø : Set where
-
-data P₀ : Set → Set where
+data ⊤ : Set where
+  ⋆ : ⊤
 
 -- subset : (X : Set) → (X → Set) → Set₁
 -- subset X P = Σ[ a ∈ X ] (P a)
@@ -50,14 +50,38 @@ allSubsets′ X =
   Σ[ P ∈ (X → Set) ]
   subset′ X P
 
--- If subset is described by a predicate that's describing an 
--- inhabited proposition for every element in X, a set of all 
--- subsets must describe a predicate that's describing an
--- inhabited proposition for every **predicate** on X
-allSubsets′′ : (X : Set) → (ℙ : (X → Set) → Set) → Set₁
-allSubsets′′ X ℙ =
+-- Identity predicate
+P-id : {X : Set} → (X → Set)
+P-id = λ{_ → ⊤}
+
+-- Zero predicate
+P₀ : {X : Set} → (X → Set)
+P₀ = λ{_ → Ø}
+
+-- If subset is described by a predicate that's describing an
+-- inhabited proposition for every **element** in X, a set of subsets
+-- must describe a predicate that's describing an inhabited
+-- proposition for every **predicate** on X
+setOfSubsets : (X : Set) → (ℙ : (X → Set) → Set) → Set₁
+setOfSubsets X ℙ =
   Σ[ P ∈ (X → Set) ]
   (ℙ P)
+
+isTopology : (X : Set) → (τ : (X → Set) → Set) → Set₁
+isTopology X τ =
+  Σ[ P ∈ (X → Set) ]
+  Σ[ _ ∈ τ P ]
+  Σ[ _ ∈ τ P-id ]
+  Σ[ _ ∈ τ P₀ ]
+  Ø  -- TODO: union of any number of sets in τ belongs to τ
+
+-- X-∈-allSubsets-X :
+--   (X : Set)
+--   → (ℙ : (X → Set) → Set)
+--   → (S : allSubsets′′ X)
+--   → (Q : ((Σ[ P ∈ (X → Set) ] Σ[ a ∈ X ] (P a)) → Set))
+--   → (Q X)
+-- X-∈-allSubsets-X = ?
 
 -- X-∈-allSubsets-X :
 --   (X : Set)
@@ -75,7 +99,7 @@ allSubsets′′ X ℙ =
 -- TODO: how do we claim that `Ø ∈ (allSubsets X)` ?
 -- TODO: how do we claim that `X ∈ (allSubsets X)` ?
 
-isTopology-alt : (X : Set) → (τ : allSubsets′ X → Set) → Set
-isTopology-alt X τ =
-  Σ[ _ ∈ τ ((λ _ → X) , {!!} , {!!}) ]
-  {!!}
+-- isTopology-alt : (X : Set) → (τ : allSubsets′ X → Set) → Set
+-- isTopology-alt X τ =
+--   Σ[ _ ∈ τ ((λ _ → X) , {!!} , {!!}) ]
+--   {!!}
