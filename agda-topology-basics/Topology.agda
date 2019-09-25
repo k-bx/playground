@@ -18,24 +18,28 @@ open import Data.Product public using (Σ; Σ-syntax; _×_; _,_; proj₁; proj�
 -- as `Σ[ x ∈ A ] (P x)` (with notion that P is mere 
 -- proposition in mind).
 
--- So first, a set of all subsets of a type is:
+subset : (X : Set) → (P : (X → Set)) → Set
+subset X P =
+  Σ[ a ∈ X ] (P a)
+
+-- If subset is described by a predicate that's describing an
+-- inhabited proposition for every **element** in X, a set of subsets
+-- must describe a predicate that's describing an inhabited
+-- proposition for every **predicate** on X
+setOfSubsets : (X : Set) → (ℙ : (X → Set) → Set) → Set₁
+setOfSubsets X ℙ =
+  Σ[ P ∈ (X → Set) ]
+  (ℙ P)
 
 data Ø : Set where
 data ⊤ : Set where
   ⋆ : ⊤
 
--- subset : (X : Set) → (X → Set) → Set₁
--- subset X P = Σ[ a ∈ X ] (P a)
-
-subset : Set → Set₁
-subset X =
+subset′ : Set → Set₁
+subset′ X =
   ∀ (P : (X → Set)) →
   Σ[ a ∈ X ]
   (P a)
-
-subset′ : (X : Set) → (P : (X → Set)) → Set
-subset′ X P =
-  Σ[ a ∈ X ] (P a)
 
 -- TODO: think again why one is Set₁ and another is Set
 
@@ -48,7 +52,7 @@ allSubsets X =
 allSubsets′ : Set → Set₁
 allSubsets′ X =
   Σ[ P ∈ (X → Set) ]
-  subset′ X P
+  subset X P
 
 -- Identity predicate
 P-id : {X : Set} → (X → Set)
@@ -57,15 +61,6 @@ P-id = λ{_ → ⊤}
 -- Zero predicate
 P₀ : {X : Set} → (X → Set)
 P₀ = λ{_ → Ø}
-
--- If subset is described by a predicate that's describing an
--- inhabited proposition for every **element** in X, a set of subsets
--- must describe a predicate that's describing an inhabited
--- proposition for every **predicate** on X
-setOfSubsets : (X : Set) → (ℙ : (X → Set) → Set) → Set₁
-setOfSubsets X ℙ =
-  Σ[ P ∈ (X → Set) ]
-  (ℙ P)
 
 isTopology : (X : Set) → (τ : (X → Set) → Set) → Set₁
 isTopology X τ =
