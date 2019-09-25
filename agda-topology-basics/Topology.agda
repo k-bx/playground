@@ -33,11 +33,11 @@ subset X =
   Σ[ a ∈ X ]
   (P a)
 
-subset-alt : (X : Set) → (P : (X → Set)) → Set
-subset-alt X P =
+subset′ : (X : Set) → (P : (X → Set)) → Set
+subset′ X P =
   Σ[ a ∈ X ] (P a)
 
--- TODO: why one is Set₁ and another is Set
+-- TODO: think again why one is Set₁ and another is Set
 
 allSubsets : Set → Set₁
 allSubsets X =
@@ -45,13 +45,37 @@ allSubsets X =
   Σ[ a ∈ X ]
   (P a)
 
-allSubsets-alt : Set → Set₁
-allSubsets-alt X =
+allSubsets′ : Set → Set₁
+allSubsets′ X =
   Σ[ P ∈ (X → Set) ]
-  subset-alt X P
+  subset′ X P
 
-isTopology : Set → Set₁
-isTopology X =
-  Σ[ τ ∈ (allSubsets X → Set) ]
-  Σ[ s ∈ allSubsets X ]
+-- If subset is described by a predicate that's describing an 
+-- inhabited proposition for every element in X, a set of all 
+-- subsets must describe a predicate that's describing an
+-- inhabited proposition for every **predicate** on X
+allSubsets′′ : (X : Set) → (ℙ : (X → Set) → Set) → Set₁
+allSubsets′′ X ℙ =
+  Σ[ P ∈ (X → Set) ]
+  (ℙ P)
+
+-- X-∈-allSubsets-X :
+--   (X : Set)
+--   → (S : Σ[ P ∈ (X → Set) ] Σ[ a ∈ X ] (P a))
+--   → (Q : ((Σ[ P ∈ (X → Set) ] Σ[ a ∈ X ] (P a)) → Set))
+--   → (Q X)
+-- X-∈-allSubsets-X = ?
+
+-- isTopology : Set → Set₁
+-- isTopology X =
+--   Σ[ τ ∈ (allSubsets X → Set) ]
+--   Σ[ s ∈ allSubsets X ]
+--   {!!}
+
+-- TODO: how do we claim that `Ø ∈ (allSubsets X)` ?
+-- TODO: how do we claim that `X ∈ (allSubsets X)` ?
+
+isTopology-alt : (X : Set) → (τ : allSubsets′ X → Set) → Set
+isTopology-alt X τ =
+  Σ[ _ ∈ τ ((λ _ → X) , {!!} , {!!}) ]
   {!!}
