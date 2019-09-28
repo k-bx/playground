@@ -45,30 +45,14 @@ P-id = λ{_ → ⊤}
 P₀ : {X : Set} → (X → Set)
 P₀ = λ{_ → Ø}
 
--- Union of subsets
-
-_∐_ : {X : Set}
-  → (A : X → Set)
-  → (B : X → Set)
-  → Set₁
-_∐_ {X} A B = X → Set
-
--- Intersection of subsets
-
-_∏_ : {X : Set}
-  → (A : X → Set)
-  → (B : X → Set)
-  → Set₁
-_∏_ {X} A B = X → Set
-
 isTopology : (X : Set) → (τ : (X → Set) → Set) → Set₁
 isTopology X τ =
   Σ[ P ∈ (X → Set) ]
   Σ[ _ ∈ τ P ]
   Σ[ _ ∈ τ P-id ]
   Σ[ _ ∈ τ P₀ ]
-  Σ[ _ ∈ (∀ (A B : X → Set) → (u : A ∐ B) → (τ A) → (τ B) → (τ u)) ]
-  Σ[ _ ∈ (∀ (A B : X → Set) → (u : A ∏ B) → (τ A) → (τ B) → (τ u)) ]
+  Σ[ _ ∈ (∀ (A B : X → Set) → (τ A) → (τ B) → (τ (λ x → A x ⊎ B x))) ]
+  Σ[ _ ∈ (∀ (A B : X → Set) → (τ A) → (τ B) → (τ (λ x → A x × B x))) ]
   ⊤
 
 --
