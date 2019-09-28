@@ -1,6 +1,7 @@
 module Topology where
 
 open import Data.Product public using (Σ; Σ-syntax; _×_; _,_; proj₁; proj₂; map₁; map₂)
+open import Data.Sum
 
 -- Goal: encode the notion of Topology:
 --
@@ -35,6 +36,35 @@ data Ø : Set where
 data ⊤ : Set where
   ⋆ : ⊤
 
+
+-- Identity predicate
+P-id : {X : Set} → (X → Set)
+P-id = λ{_ → ⊤}
+
+-- Zero predicate
+P₀ : {X : Set} → (X → Set)
+P₀ = λ{_ → Ø}
+
+-- Union of subsets
+
+SubsetUnion : {X : Set}
+  → (A : X → Set)
+  → (B : X → Set)
+  → Set₁
+SubsetUnion {X} A B = {!!}
+
+isTopology : (X : Set) → (τ : (X → Set) → Set) → Set₁
+isTopology X τ =
+  Σ[ P ∈ (X → Set) ]
+  Σ[ _ ∈ τ P ]
+  Σ[ _ ∈ τ P-id ]
+  Σ[ _ ∈ τ P₀ ]
+  (∀ (A B : X → Set) → (u : SubsetUnion A B) → (τ A) → (τ B) → (τ u))  -- TODO: union of any number of sets in τ belongs to τ
+
+--
+-- Please do not read below this line (a.k.a. Here Be Dragons...)
+--
+
 subset′ : Set → Set₁
 subset′ X =
   ∀ (P : (X → Set)) →
@@ -53,22 +83,6 @@ allSubsets′ : Set → Set₁
 allSubsets′ X =
   Σ[ P ∈ (X → Set) ]
   subset X P
-
--- Identity predicate
-P-id : {X : Set} → (X → Set)
-P-id = λ{_ → ⊤}
-
--- Zero predicate
-P₀ : {X : Set} → (X → Set)
-P₀ = λ{_ → Ø}
-
-isTopology : (X : Set) → (τ : (X → Set) → Set) → Set₁
-isTopology X τ =
-  Σ[ P ∈ (X → Set) ]
-  Σ[ _ ∈ τ P ]
-  Σ[ _ ∈ τ P-id ]
-  Σ[ _ ∈ τ P₀ ]
-  Ø  -- TODO: union of any number of sets in τ belongs to τ
 
 -- X-∈-allSubsets-X :
 --   (X : Set)
