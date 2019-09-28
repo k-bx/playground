@@ -47,11 +47,19 @@ P₀ = λ{_ → Ø}
 
 -- Union of subsets
 
-SubsetUnion : {X : Set}
+_∐_ : {X : Set}
   → (A : X → Set)
   → (B : X → Set)
   → Set₁
-SubsetUnion {X} A B = {!!}
+_∐_ {X} A B = X → Set
+
+-- Intersection of subsets
+
+_∏_ : {X : Set}
+  → (A : X → Set)
+  → (B : X → Set)
+  → Set₁
+_∏_ {X} A B = X → Set
 
 isTopology : (X : Set) → (τ : (X → Set) → Set) → Set₁
 isTopology X τ =
@@ -59,7 +67,9 @@ isTopology X τ =
   Σ[ _ ∈ τ P ]
   Σ[ _ ∈ τ P-id ]
   Σ[ _ ∈ τ P₀ ]
-  (∀ (A B : X → Set) → (u : SubsetUnion A B) → (τ A) → (τ B) → (τ u))  -- TODO: union of any number of sets in τ belongs to τ
+  Σ[ _ ∈ (∀ (A B : X → Set) → (u : A ∐ B) → (τ A) → (τ B) → (τ u)) ]
+  Σ[ _ ∈ (∀ (A B : X → Set) → (u : A ∏ B) → (τ A) → (τ B) → (τ u)) ]
+  ⊤
 
 --
 -- Please do not read below this line (a.k.a. Here Be Dragons...)
