@@ -1,8 +1,5 @@
 open import Level
 
-data T {n} : Set n where
-  ⊤ : T
-
 data ⊥ {n} : Set n where
 
 iAmLying : {n : Level}
