@@ -4,6 +4,23 @@ open Eq.≡-Reasoning
 open import Data.Product public using (Σ; Σ-syntax; _×_; _,_; proj₁; proj₂; map₁; map₂)
 open import Data.Sum
 
+infix 0 _≃_
+record _≃_ (A B : Set) : Set where
+  field
+    to   : A → B
+    from : B → A
+    from∘to : ∀ (x : A) → from (to x) ≡ x
+    to∘from : ∀ (y : B) → to (from y) ≡ y
+open _≃_
+
+infix 0 _≲_
+record _≲_ (A B : Set) : Set where
+  field
+    to      : A → B
+    from    : B → A
+    from∘to : ∀ (x : A) → from (to x) ≡ x
+open _≲_
+
 -- record Topology : (X : Set) → (τ : (X → Set) → Set) →  Set₁ where
 -- Topology X τ =
 --   Σ[ P ∈ (X → Set) ]
@@ -14,16 +31,19 @@ open import Data.Sum
 --   Σ[ _ ∈ (∀ (A B : X → Set) → (τ A) → (τ B) → (τ (λ x → A x × B x))) ]
 --   ⊤
 
+-- This seems non-controversial at this point
+
 SetOfSubsets : Set → Set₁
 SetOfSubsets X = (X → Set) → Set
 
-infix 0 _≲_
-record _≲_ (A B : Set) : Set where
-  field
-    to      : A → B
-    from    : B → A
-    from∘to : ∀ (x : A) → from (to x) ≡ x
-open _≲_
+-- How do we say that something is present in a given set of subsets?
+--
+-- Probably give back the predicate and show all elements satisfying
+-- it are isomorphic to S?
+_∈ₛ_ : {X : Set} → (S : Set) → (SetOfSubsets X) → Set₁
+_∈ₛ_ {X} S ℙ =
+  Σ[ P ∈ (X → Set) ]
+  ( ∀ (x : X) → (P x ≃ S))
 
 -- "Topology without tears" 2.3.2 constructively
 --
@@ -40,7 +60,8 @@ prop232
             → (U ≲ X)
             -- → (U ≲ τ)
             → (x : U)
-            → Σ[ B ∈ 𝐵 ]
+            → Σ[ B ∈ Set ]
+              Σ[ _ ∈ (B ∈ₛ 𝐵) ]
               Σ[ B⊆U ∈ B ≲ U ]
               Σ[ b ∈ B ]
               ((_≲_.to b) ≡ x))
