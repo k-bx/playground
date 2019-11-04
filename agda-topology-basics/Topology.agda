@@ -36,7 +36,6 @@ data Ø : Set where
 data ⊤ : Set where
   ⋆ : ⊤
 
-
 -- Identity predicate
 P-id : {X : Set} → (X → Set)
 P-id = λ{_ → ⊤}
