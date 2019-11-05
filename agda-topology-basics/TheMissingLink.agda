@@ -3,9 +3,10 @@ open Eq using (_≡_; refl; cong; cong-app)
 open Eq.≡-Reasoning
 open import Data.Product public using (Σ; Σ-syntax; _×_; _,_; proj₁; proj₂; map₁; map₂)
 open import Data.Sum
+open import Level
 
 infix 0 _≃_
-record _≃_ (A B : Set) : Set where
+record _≃_ {l m} (A : Set l) (B : Set m) : Set (l ⊔ m) where
   field
     to   : A → B
     from : B → A
@@ -40,10 +41,13 @@ SetOfSubsets X = (X → Set) → Set
 --
 -- Probably give back the predicate and show all elements satisfying
 -- it are isomorphic to S?
-_∈ₛ_ : {X : Set} → (S : Set) → (SetOfSubsets X) → Set₁
-_∈ₛ_ {X} S ℙ =
+_∈s_ : {X : Set} → (S : Set) → (SetOfSubsets X) → Set₁
+_∈s_ {X} S ℙ =
   Σ[ P ∈ (X → Set) ]
   ( ∀ (x : X) → (P x ≃ S))
+
+Union : (X : Set) → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
+Union X J 𝐵 = Σ[ j ∈ J ] Σ[ Bⱼ ∈ Set ] (Bⱼ ∈s 𝐵)
 
 -- "Topology without tears" 2.3.2 constructively
 --
@@ -61,9 +65,15 @@ prop232
             -- → (U ≲ τ)
             → (x : U)
             → Σ[ B ∈ Set ]
-              Σ[ _ ∈ (B ∈ₛ 𝐵) ]
-              Σ[ B⊆U ∈ B ≲ U ]
+              Σ[ _ ∈ (B ∈s 𝐵) ]
+              Σ[ B≲U ∈ B ≲ U ]
               Σ[ b ∈ B ]
-              ((_≲_.to b) ≡ x))
-  → ?
--- prop232 = ?
+              ((_≲_.to B≲U b) ≡ x)
+              )
+  → (∀ (V : Set)
+     → (V ≲ X)
+     -- → V ∈ τ
+     → Σ[ J ∈ Set ]
+       (V ≃ (Union X J 𝐵))
+    )
+prop232 = {!!}

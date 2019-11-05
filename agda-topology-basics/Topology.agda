@@ -2,6 +2,7 @@ module Topology where
 
 open import Data.Product public using (Σ; Σ-syntax; _×_; _,_; proj₁; proj₂; map₁; map₂)
 open import Data.Sum
+open import Data.Bool
 
 -- Goal: encode the notion of Topology:
 --
@@ -44,6 +45,7 @@ P-id = λ{_ → ⊤}
 P₀ : {X : Set} → (X → Set)
 P₀ = λ{_ → Ø}
 
+
 isTopology : (X : Set) → (τ : (X → Set) → Set) → Set₁
 isTopology X τ =
   Σ[ P ∈ (X → Set) ]
@@ -53,6 +55,51 @@ isTopology X τ =
   Σ[ _ ∈ (∀ (A B : X → Set) → (τ A) → (τ B) → (τ (λ x → A x ⊎ B x))) ]
   Σ[ _ ∈ (∀ (A B : X → Set) → (τ A) → (τ B) → (τ (λ x → A x × B x))) ]
   ⊤
+
+-- Let's encode Example 1.1.8 from the book "Topology Without Tears"
+
+data X₁ : Set where
+  a : X₁
+  b : X₁
+  c : X₁
+
+-- t₁ℙ describes all predicates that are describing subsets
+t₁ℙ : (X → Set) → Set
+t₁ℙ P₀ = 
+
+τ₁ : setOfSubsets X₁ t₁ℙ
+
+-- is-X₁-predicate-equal : (P₁ : X₁ → Set) → (P₂ : X₁ → Set) → Set
+-- is-X₁-predicate-equal = with P₁
+--   | x = {!!}
+
+-- τ₁_P₁ : X₁ → Set
+-- τ₁ a P₁ = ⊤
+-- τ₁ b P₁ = ⊤
+-- τ₁ c P₁ = ⊤
+-- τ₁ d P₁ = ⊤
+-- τ₁ e P₁ = ⊤
+-- τ₁ f P₁ = ⊤
+
+-- τ₁_P₂ : X₁ → Set
+-- τ₁ a P₂ = ⊤
+-- τ₁ b P₂ = Ø
+-- τ₁ c P₂ = Ø
+-- τ₁ d P₂ = Ø
+-- τ₁ e P₂ = Ø
+-- τ₁ f P₂ = Ø
+
+-- τ₁_el₁ : subset X₁ τ₁_P₁
+-- τ₁_el₁ = a , ⋆
+
+-- τ₁_el₂ : subset X₁ τ₁_P₂
+-- τ₁_el₂ = a , ⋆
+
+-- τ₁_el₃ : subset X₁ P₀
+-- τ₁_el₃ = {!!}
+
+-- -- τ₁ : (X₁ → Set) → Set
+-- -- τ₁ P = {!!}
 
 --
 -- Please do not read below this line (a.k.a. Here Be Dragons...)
