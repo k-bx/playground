@@ -22,6 +22,9 @@ record _≲_ (A B : Set) : Set where
     from∘to : ∀ (x : A) → from (to x) ≡ x
 open _≲_
 
+--
+-- copy of old stuff, I can do better now (like infinite unions)
+--
 -- record Topology : (X : Set) → (τ : (X → Set) → Set) →  Set₁ where
 -- Topology X τ =
 --   Σ[ P ∈ (X → Set) ]
@@ -33,7 +36,7 @@ open _≲_
 --   ⊤
 
 -- This seems non-controversial at this point
-
+--
 SetOfSubsets : Set → Set₁
 SetOfSubsets X = (X → Set) → Set
 
@@ -41,20 +44,26 @@ SetOfSubsets X = (X → Set) → Set
 --
 -- Probably give back the predicate and show all elements satisfying
 -- it are isomorphic to S?
+--
 _∈s_ : {X : Set} → (S : Set) → (SetOfSubsets X) → Set₁
 _∈s_ {X} S ℙ =
   Σ[ P ∈ (X → Set) ]
   ( ∀ (x : X) → (P x ≃ S))
 
-Union : (X : Set) → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
-Union X J 𝐵 = Σ[ j ∈ J ] Σ[ Bⱼ ∈ Set ] (Bⱼ ∈s 𝐵)
+--
+-- Type of a potentially infinite union of subsets of X indexed by
+-- type J is a triple of index, type by that index (no proof of that),
+-- and a proof that it's in the set of subsets
+--
+--
+Union : {X : Set} → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
+Union J 𝐵 = Σ[ j ∈ J ] Σ[ Bⱼ ∈ Set ] (Bⱼ ∈s 𝐵)
 
 -- "Topology without tears" 2.3.2 constructively
 --
 -- 2.3.2 Let (X, τ) be a topological space. A family B of open subsets
 -- of X is a basis for τ if and only if for any point x belonging to
 -- any open set U , there is a B ∈ B such that x ∈ B ⊆ U.
---
 --
 prop232
   : (X : Set)
@@ -74,6 +83,22 @@ prop232
      → (V ≲ X)
      -- → V ∈ τ
      → Σ[ J ∈ Set ]
-       (V ≃ (Union X J 𝐵))
+       (V ≃ (Union J 𝐵))
     )
-prop232 = {!!}
+prop232 X τ 𝐵 given₁ V V≲X
+  = V
+  , record
+      { to = λ x → x
+             , V
+             , (λ x₁ → V)
+             , λ x₁ →
+                 record
+                   { to = λ x₂ → x₂
+                   ; from = λ x₂ → x₂
+                   ; from∘to = λ x₂ → refl
+                   ; to∘from = λ y → refl
+                   }
+      ; from = λ{ (fst , snd) → fst}
+      ; from∘to = λ x → refl
+      ; to∘from = λ{ (fst , fst₁ , fst₂ , snd) → {!!}} -- <- I needed to use Univalence when doing this with pen and paper
+      }
