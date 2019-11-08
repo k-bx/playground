@@ -35,12 +35,14 @@ isTopology xs tts =
 main :: IO ()
 main = do
   let res = 
-    S.fromList
-      ([ tts
-       | tts <- S.toList (findTopologies (S.fromList ['a', 'b', 'c', 'd']))
-       , length tts == 4
-       ])
+        S.fromList
+          ([ tts
+           | tts <- S.toList (findTopologies (S.fromList ['a', 'b', 'c', 'd']))
+           , length tts == 4
+           ])
   print $ length res
+
+-- length == 91
 
 -- fromList
 --   [ fromList [fromList "", fromList "a", fromList "ab", fromList "abcd"]
