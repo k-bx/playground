@@ -62,8 +62,18 @@ _∈s_ {X} S ℙ =
 -- and a proof that it's in the set of subsets
 --
 --
+-- Union : {X : Set} → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
+-- Union J 𝐵 = Σ[ j ∈ J ] Σ[ Bⱼ ∈ Set ] (Bⱼ ∈s 𝐵)
+
 Union : {X : Set} → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
-Union J 𝐵 = Σ[ j ∈ J ] Σ[ Bⱼ ∈ Set ] (Bⱼ ∈s 𝐵)
+Union J 𝐵 =
+  Σ[ j ∈ J ]
+  Σ[ Bⱼ ∈ Set ]
+  (Bⱼ ∈s 𝐵)
+
+UnionTruncation : {X : Set} → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
+UnionTruncation J 𝐵 =
+  (j : Union J 𝐵) → (k : Union J 𝐵) → (proj₁ j ≡ proj₁ k) → j ≡ k
 
 record UnionRec {X : Set} (J : Set) (𝐵 : SetOfSubsets X) : Set₁ where
   field
@@ -100,103 +110,21 @@ prop232
   → (∀ (V : Set)
      → (V ≲ X)
      -- → V ∈ τ
+     → UnionTruncation V 𝐵
      → Σ[ J ∈ Set ]
        (V ≃ (Union J 𝐵))
     )
-prop232 X τ 𝐵 given₁ V V≲X
+prop232 X τ 𝐵 given₁ V V≲X unionTruncation
   = V
   , record
     { to = λ v → let ( Bₓ , B∈s𝐵 , B≲U , b , b→v ) = given₁ V V≲X v
                   in v , Bₓ , B∈s𝐵
-                  -- in {!b , ? , ?!}
-                  -- in v , Bₓ , B∈s𝐵
     ; from = λ{ (x , Bₓ , Bₓ∈s𝐵) → x}
     ; from∘to = λ x → refl
-    ; to∘from = λ{ (x , Bₓ , Bₓ∈s𝐵) → {! !}}
-    -- prop232--to∘from -- λ{ (x , Bₓ , Bₓ∈s𝐵) → {!!}}
+    ; to∘from = λ y → unionTruncation
+                         ( proj₁ y
+                         , proj₁ (given₁ V V≲X (proj₁ y))
+                         , proj₁ (proj₂ (given₁ V V≲X (proj₁ y))))
+                         y
+                         refl
     }
-
--- Goal: (x , proj₁ (given₁ V V≲X x) , proj₁ (proj₂ (given₁ V V≲X x)))
---       ≡ (x , Bₓ , Bₓ∈s𝐵)
-
-  where
-    subg₁ : (V : Set) → (x : V) → (V≲X : V ≲ X)
-      → (Bₓ : Set)
-      → (Bₓ∈s𝐵  : Bₓ ∈s 𝐵)
-      → proj₁ (given₁ V V≲X x) ≡ Bₓ
-    subg₁ V x V≲X Bₓ Bₓ∈s𝐵 =
-      ua (record
-          { to = λ{proj₁_given₁_V_V≲X_x → {!!}}
-          ; from = λ Bₓ₁ → {!Bₓ₁!}
-          ; from∘to = {!!}
-          ; to∘from = {!!}
-          })
-
-    -- prop232--to∘from--iso : (y : Union V 𝐵) →
-    --   (((λ { (x , Bₓ , Bₓ∈s𝐵) → x }) y ,
-    --    proj₁ (given₁ V V≲X ((λ { (x , Bₓ , Bₓ∈s𝐵) → x }) y)) ,
-    --    proj₁ (proj₂ (given₁ V V≲X ((λ { (x , Bₓ , Bₓ∈s𝐵) → x }) y))))
-    --    ≃ y)
-    -- prop232--to∘from--iso = {!!}
-    -- prop232--to∘from : (y : Union V 𝐵) →
-    --   ((λ { (x , Bₓ , Bₓ∈s𝐵) → x }) y ,
-    --    proj₁ (given₁ V V≲X ((λ { (x , Bₓ , Bₓ∈s𝐵) → x }) y)) ,
-    --    proj₁ (proj₂ (given₁ V V≲X ((λ { (x , Bₓ , Bₓ∈s𝐵) → x }) y))))
-    --   ≡ y
-    -- prop232--to∘from y = {!ua (prop232--to∘from--iso y)!}
- 
--- Goal: (x , proj₁ (given₁ V V≲X x) , proj₁ (proj₂ (given₁ V V≲X x)))
---       ≡ (x , Bₓ , Bₓ∈s𝐵)
-
--- prop232Rec
---   : (X : Set)
---   → (τ : SetOfSubsets X)
---   → (𝐵 : SetOfSubsets X)
---   → (given₁ : ∀ (U : Set)
---             → (U ≲ X)
---             -- → (U ≲ τ)
---             → (x : U)
---             → Σ[ B ∈ Set ]
---               Σ[ _ ∈ (B ∈s 𝐵) ]
---               Σ[ B≲U ∈ B ≲ U ]
---               Σ[ b ∈ B ]
---               ((_≲_.to B≲U b) ≡ x)
---               )
---   → (∀ (V : Set)
---      → (V ≲ X)
---      -- → V ∈ τ
---      → Σ[ J ∈ Set ]
---        (V ≃ (UnionRec J 𝐵))
---     )
--- prop232Rec X τ 𝐵 given₁ V V≲X
---   = V
---   , record
---     { to = λ v →
---            let ( Bₓ , B∈s𝐵 , p₂ , p₃ ) = given₁ V V≲X v
---            in
---              record
---                { getJ = v
---                ; getBj = Bₓ
---                ; getBjInB = B∈s𝐵
---                }
---     ; from = λ x → getJ x -- λ{ (x , Bₓ , Bₓ∈s𝐵) → x}
---     ; from∘to = λ x → refl
---     ; to∘from = prop232--to∘from -- λ{ (x , Bₓ , Bₓ∈s𝐵) → {!!}}
---     }
---   where
---     prop232--to∘from--iso : (y : UnionRec V 𝐵) →
---       record
---       { getJ = getJ y
---       ; getBj = proj₁ (given₁ V V≲X (getJ y))
---       ; getBjInB = proj₁ (proj₂ (given₁ V V≲X (getJ y)))
---       }
---       ≃ y
---     prop232--to∘from--iso = {!!}
---     prop232--to∘from : (y : UnionRec V 𝐵) →
---       record
---       { getJ = getJ y
---       ; getBj = proj₁ (given₁ V V≲X (getJ y))
---       ; getBjInB = proj₁ (proj₂ (given₁ V V≲X (getJ y)))
---       }
---       ≡ y
---     prop232--to∘from = {!!}
