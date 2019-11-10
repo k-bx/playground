@@ -1,3 +1,5 @@
+module TheMissingLink where
+
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; cong; cong-app)
 open Eq.≡-Reasoning
@@ -5,8 +7,18 @@ open import Data.Product public using (Σ; Σ-syntax; _×_; _,_; proj₁; proj�
 open import Data.Sum
 open import Level
 
+
+Type : (ℓ : Level) → Set (suc ℓ)
+Type ℓ = Set ℓ
+
+Type₀ : Type (suc zero)
+Type₀ = Type zero
+
+Type₁ : Type (suc (suc zero))
+Type₁ = Type (suc zero)
+
 infix 0 _≃_
-record _≃_ {l m} (A : Set l) (B : Set m) : Set (l ⊔ m) where
+record _≃_ {l m} (A : Type l) (B : Type m) : Type (l ⊔ m) where
   field
     to   : A → B
     from : B → A
@@ -14,8 +26,17 @@ record _≃_ {l m} (A : Set l) (B : Set m) : Set (l ⊔ m) where
     to∘from : ∀ (y : B) → to (from y) ≡ y
 open _≃_
 
+-- infix 0 _≃_
+-- record _≃_ (A : Type) (B : Type) : Type where
+--   field
+--     to   : A → B
+--     from : B → A
+--     from∘to : ∀ (x : A) → from (to x) ≡ x
+--     to∘from : ∀ (y : B) → to (from y) ≡ y
+-- open _≃_
+
 infix 0 _≲_
-record _≲_ (A B : Set) : Set where
+record _≲_ (A B : Type₀) : Type₀ where
   field
     to      : A → B
     from    : B → A
@@ -23,10 +44,10 @@ record _≲_ (A B : Set) : Set where
 open _≲_
 
 
-postulate  -- Univalence axiom
-  coe-equiv : ∀ {A B : Set} → A ≡ B → A ≃ B
-  ua : ∀ {l} {A B : Set l} → (A ≃ B) → A ≡ B
-  ua-η : {A B : Set} (p : A ≡ B) → ua (coe-equiv p) ≡ p
+-- postulate  -- Univalence axiom
+--   coe-equiv : ∀ {A B : Set} → A ≡ B → A ≃ B
+--   ua : ∀ {l} {A B : Set l} → (A ≃ B) → A ≡ B
+--   ua-η : {A B : Set} (p : A ≡ B) → ua (coe-equiv p) ≡ p
 
 --
 -- copy of old stuff, I can do better now (like infinite unions)
@@ -43,17 +64,26 @@ postulate  -- Univalence axiom
 
 -- This seems non-controversial at this point
 --
-SetOfSubsets : Set → Set₁
-SetOfSubsets X = (X → Set) → Set
+-- SetOfSubsets : Set → Set₁
+-- SetOfSubsets X = (X → Set) → Set
+
+Pred : Type₀ → Type₁
+Pred X = X → Type₀
+
+PredOnPred : Type₀ → Type₁
+PredOnPred X = (X → Type₀) → Type₀
+
+SetOfSubs : (X : Type₀) → (ℙ : PredOnPred X) → Type₁
+SetOfSubs X ℙ = Σ[ P ∈ Pred X ] (PredOnPred X)
 
 -- How do we say that something is present in a given set of subsets?
 --
 -- Probably give back the predicate and show all elements satisfying
 -- it are isomorphic to S?
 --
-_∈s_ : {X : Set} → (S : Set) → (SetOfSubsets X) → Set₁
+_∈s_ : {X : Type₀} → (S : Type₀) → (PredOnPred X) → Type₁
 _∈s_ {X} S ℙ =
-  Σ[ P ∈ (X → Set) ]
+  Σ[ P ∈ (X → Type₀) ]
   ( ∀ (x : X) → (P x ≃ S))
 
 --
@@ -65,20 +95,20 @@ _∈s_ {X} S ℙ =
 -- Union : {X : Set} → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
 -- Union J 𝐵 = Σ[ j ∈ J ] Σ[ Bⱼ ∈ Set ] (Bⱼ ∈s 𝐵)
 
-Union : {X : Set} → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
+Union : {X : Type₀} → (J : Type₀) → (𝐵 : PredOnPred X) → Type₁
 Union J 𝐵 =
   Σ[ j ∈ J ]
-  Σ[ Bⱼ ∈ Set ]
+  Σ[ Bⱼ ∈ Type₀ ]
   (Bⱼ ∈s 𝐵)
 
-UnionTruncation : {X : Set} → (J : Set) → (𝐵 : SetOfSubsets X) → Set₁
+UnionTruncation : {X : Type₀} → (J : Type₀) → (𝐵 : PredOnPred X) → Type₁
 UnionTruncation J 𝐵 =
   (j : Union J 𝐵) → (k : Union J 𝐵) → (proj₁ j ≡ proj₁ k) → j ≡ k
 
-record UnionRec {X : Set} (J : Set) (𝐵 : SetOfSubsets X) : Set₁ where
+record UnionRec {X : Type₀} (J : Type₀) (𝐵 : PredOnPred X) : Type₁ where
   field
     getJ : J
-    getBj : Set
+    getBj : Type₀
     getBjInB : getBj ∈s 𝐵
 open UnionRec
 
@@ -94,24 +124,24 @@ open UnionRec
 -- This only proves the second part (given ... proves that B is a basis)
 --
 prop232
-  : (X : Set)
-  → (τ : SetOfSubsets X)
-  → (𝐵 : SetOfSubsets X)
-  → (given₁ : ∀ (U : Set)
+  : (X : Type₀)
+  → (τ : PredOnPred X)
+  → (𝐵 : PredOnPred X)
+  → (given₁ : ∀ (U : Type₀)
             → (U ≲ X)
             -- → (U ≲ τ)
             → (x : U)
-            → Σ[ B ∈ Set ]
+            → Σ[ B ∈ Type₀ ]
               Σ[ _ ∈ (B ∈s 𝐵) ]
               Σ[ B≲U ∈ B ≲ U ]
               Σ[ b ∈ B ]
               ((_≲_.to B≲U b) ≡ x)
               )
-  → (∀ (V : Set)
+  → (∀ (V : Type₀)
      → (V ≲ X)
      -- → V ∈ τ
      → UnionTruncation V 𝐵
-     → Σ[ J ∈ Set ]
+     → Σ[ J ∈ Type₀ ]
        (V ≃ (Union J 𝐵))
     )
 prop232 X τ 𝐵 given₁ V V≲X unionTruncation
