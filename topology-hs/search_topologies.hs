@@ -28,8 +28,10 @@ isTopology xs tts =
      , ts2 <- S.toList tts
      ])
 
-main :: IO ()
-main = do
+renderTopology = Data.List.sort . map (map S.toList) . map S.toList . S.toList
+
+dz_1_3 :: IO ()
+dz_1_3 = do
   let res =
         S.fromList
           ([ tts
@@ -37,51 +39,20 @@ main = do
            , length tts == 4
            ])
   print $ length res
-  print $ Data.List.sort $ map (map S.toList) $ map S.toList $ S.toList res
+  print $ renderTopology res
 
--- 43
---
--- [ ["", "a", "ab", "abcd"]
--- , ["", "a", "abc", "abcd"]
--- , ["", "a", "abcd", "abd"]
--- , ["", "a", "abcd", "ac"]
--- , ["", "a", "abcd", "acd"]
--- , ["", "a", "abcd", "ad"]
--- , ["", "a", "abcd", "bcd"]
--- , ["", "ab", "abc", "abcd"]
--- , ["", "ab", "abcd", "abd"]
--- , ["", "ab", "abcd", "b"]
--- , ["", "ab", "abcd", "cd"]
--- , ["", "abc", "abcd", "ac"]
--- , ["", "abc", "abcd", "b"]
--- , ["", "abc", "abcd", "bc"]
--- , ["", "abc", "abcd", "c"]
--- , ["", "abc", "abcd", "d"]
--- , ["", "abcd", "abd", "ad"]
--- , ["", "abcd", "abd", "b"]
--- , ["", "abcd", "abd", "bd"]
--- , ["", "abcd", "abd", "c"]
--- , ["", "abcd", "abd", "d"]
--- , ["", "abcd", "ac", "acd"]
--- , ["", "abcd", "ac", "bd"]
--- , ["", "abcd", "ac", "c"]
--- , ["", "abcd", "acd", "ad"]
--- , ["", "abcd", "acd", "b"]
--- , ["", "abcd", "acd", "c"]
--- , ["", "abcd", "acd", "cd"]
--- , ["", "abcd", "acd", "d"]
--- , ["", "abcd", "ad", "bc"]
--- , ["", "abcd", "ad", "d"]
--- , ["", "abcd", "b", "bc"]
--- , ["", "abcd", "b", "bcd"]
--- , ["", "abcd", "b", "bd"]
--- , ["", "abcd", "bc", "bcd"]
--- , ["", "abcd", "bc", "c"]
--- , ["", "abcd", "bcd", "bd"]
--- , ["", "abcd", "bcd", "c"]
--- , ["", "abcd", "bcd", "cd"]
--- , ["", "abcd", "bcd", "d"]
--- , ["", "abcd", "bd", "d"]
--- , ["", "abcd", "c", "cd"]
--- , ["", "abcd", "cd", "d"]
--- ]
+dz_1_4 :: IO ()
+dz_1_4 = do
+  let res2 =
+        S.fromList
+          ([tts | tts <- S.toList (findTopologies (S.fromList ['a', 'b']))])
+  print $ length res2
+  print $ renderTopology res2
+  let res3 =
+        S.fromList
+          ([tts | tts <- S.toList (findTopologies (S.fromList ['a', 'b', 'c']))])
+  print $ length res3
+  print $ renderTopology res3
+
+main :: IO ()
+main = dz_1_4
