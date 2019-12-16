@@ -1,6 +1,7 @@
 module Main where
 
 import qualified Data.Char
+import Data.Function (on)
 import qualified Data.List
 
 data DaPhone =
@@ -60,6 +61,54 @@ reverseTaps phone chr =
 cellPhonesDead :: DaPhone -> String -> [(Digit, Presses)]
 cellPhonesDead phone str =
   Data.List.foldl' (\acc chr -> reverseTaps phone chr ++ acc) [] str
+
+-- How many times do digits need to be pressed for each message?
+fingerTaps :: [(Digit, Presses)] -> Presses
+fingerTaps xs = sum (map snd xs)
+
+lettersPopularity :: String -> [(Char, Int)]
+lettersPopularity str =
+  Data.List.foldl'
+    (\acc chr ->
+       case Data.List.lookup chr acc of
+         Nothing -> [(chr, 1)] ++ acc
+         Just count -> [(chr, count + 1)] ++ acc)
+    []
+    str
+
+-- What was the most popular letter for each message? What was
+-- its cost? You’ll want to combine reverseTaps and fingerTaps to
+-- figure out what it cost in taps. reverseTaps is a list because you
+-- need to press a different button in order to get capitals.
+mostPopularLetter :: String -> Char
+mostPopularLetter str =
+  fst (Data.List.maximumBy (compare `on` snd) (lettersPopularity str))
+
+mostPopularLetterCost :: String -> (Char, Int)
+mostPopularLetterCost str =
+  let letter = mostPopularLetter str
+      occurrencesNum = length (filter (== letter) str)
+   in (letter, occurrencesNum * (fingerTaps (reverseTaps phone letter)))
+
+coolestLtr :: [String] -> Char
+coolestLtr strs =
+  let str = Data.List.concat strs
+   in mostPopularLetter str
+
+coolestWord :: [String] -> String
+coolestWord strings =
+  let wordPopularity :: [String] -> [(String, Int)]
+      wordPopularity words =
+        Data.List.foldl'
+          (\acc word ->
+             case Data.List.lookup word acc of
+               Nothing -> [(word, 1)] ++ acc
+               Just count -> [(word, count + 1)] ++ acc)
+          []
+          words
+      allWords = Data.List.words (Data.List.unlines strings)
+   in fst (Data.List.maximumBy (compare `on` snd) (wordPopularity allWords))
+
 
 main :: IO ()
 main = do
