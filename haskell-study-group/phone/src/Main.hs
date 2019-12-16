@@ -58,7 +58,8 @@ reverseTaps phone chr =
            (phnNumbers phone)
 
 cellPhonesDead :: DaPhone -> String -> [(Digit, Presses)]
-cellPhonesDead = undefined
+cellPhonesDead phone str =
+  Data.List.foldl' (\acc chr -> reverseTaps phone chr ++ acc) [] str
 
 main :: IO ()
 main = do
