@@ -26,3 +26,5 @@ executable haskellbook-ch19-examples
                      , monad-logger
                      , fast-logger
                      , bytestring
+                     , time
+                     , uuid

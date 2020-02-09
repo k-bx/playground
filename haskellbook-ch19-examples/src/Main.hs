@@ -2,6 +2,8 @@
 
 module Main where
 
+import qualified Data.UUID as UUID
+import qualified Data.UUID.V4 as UUIDv4
 import Control.Monad.Logger
 import Control.Monad.Trans.Resource
 import qualified Data.Text as T
@@ -13,6 +15,7 @@ import System.Environment
 import System.Log.FastLogger (fromLogStr)
 import Web.Scotty
 import qualified Data.ByteString.Char8 as BSC8
+import Data.Time.Clock
 
 main :: IO ()
 main = do
@@ -42,3 +45,10 @@ runDb query = do
           ""
           params
   runResourceT . withPostgresqlConn connStr $ P.runSqlConn query
+
+offsetCurrentTime :: NominalDiffTime -> IO UTCTime
+offsetCurrentTime offset =
+  fmap (addUTCTime (offset * 24 * 3600)) $ getCurrentTime
+
+textUuid :: IO T.Text
+textUuid = fmap (T.pack . UUID.toString) UUIDv4.nextRandom
