@@ -18,6 +18,11 @@ import System.Log.FastLogger (fromLogStr)
 import Web.Scotty
 import qualified Data.ByteString.Char8 as BSC8
 import Data.Time.Clock
+import qualified Data.Csv as Csv
+import Data.Csv ((.!))
+import qualified Data.Vector as V
+import Control.Monad (mzero)
+
 
 main :: IO ()
 main = do
@@ -78,3 +83,17 @@ instance FromJSON Payload where
             <*> v .: "body"
             <*> v .: "offset_seconds"
   parseJSON v = typeMismatch "Payload" v
+
+-- parseRecord :: Record -> Parser a
+
+data Release = Release Int Int Int String String
+
+instance Csv.FromRecord Release where
+  parseRecord v
+    | V.length v == 5 =
+        Release <$> v .! 0
+                <*> v .! 1
+                <*> v .! 2
+                <*> v .! 3
+                <*> v .! 4
+    | otherwise = mzero

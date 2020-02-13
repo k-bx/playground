@@ -29,3 +29,5 @@ executable haskellbook-ch19-examples
                      , time
                      , uuid
                      , aeson
+                     , cassava
+                     , vector
