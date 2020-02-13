@@ -32,3 +32,4 @@ executable haskellbook-ch19-examples
                      , cassava
                      , vector
                      , network
+                     , transformers

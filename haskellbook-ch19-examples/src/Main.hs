@@ -1,8 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
 
 module Main where
 
+import Control.Monad.Trans.Class (lift)
+import Data.Functor.Identity
+import qualified Control.Monad.Trans.Reader as R
 import GHC.Generics
 import qualified Network.Socket as NS
 import Data.Aeson (FromJSON(..), ToJSON(..), Value(..), (.:), (.=))
@@ -160,3 +164,50 @@ openSocket p = do
   return sock
   where
     sockAddr = NS.SockAddrUnix p
+
+addStuff :: Int -> Int  
+addStuff = do  
+    a <- (*2)  
+    b <- (+10)  
+    return (a+b)
+
+-- readerExample :: R.ReaderT Int Identity String
+readerExample :: R.Reader Int String
+readerExample = do
+  useless1 <- pure 10
+  useless2 <- pure 20
+  state <- R.ask
+  useless3 <- pure 30
+  pure $ show $ useless1 + useless2 + state + useless3
+
+-- ReaderT Example
+
+data Config =
+  Config { banToby :: Bool }
+
+imaginedUserRegister :: String -> R.ReaderT Config IO String
+imaginedUserRegister name = do
+  user <- lookupUser name
+  case user of
+    True -> pure "Sorry, user already exists"
+    False -> do
+      cfg <- R.ask
+      if ((name == "Toby") && (banToby cfg))
+        then pure "Sorry, Toby is not allowed"
+        else do
+          insertUser name
+          pure "Success"
+  where
+    lookupUser :: String -> R.ReaderT Config IO Bool
+    lookupUser _uname = pure False
+    insertUser :: String -> R.ReaderT Config IO ()
+    insertUser name = do
+      lift (insertUserIO name)
+      pure ()
+    insertUserIO :: String -> IO ()
+    insertUserIO user = pure ()
+
+runTheRegister :: IO String
+runTheRegister =
+  let cfg = (Config { banToby = True })
+  in R.runReaderT (imaginedUserRegister "Toby") cfg
