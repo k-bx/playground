@@ -2,6 +2,7 @@
 
 module Main where
 
+import qualified Network.Socket as NS
 import Data.Aeson (FromJSON(..), Value(..), (.:))
 import Data.Aeson.Types (typeMismatch)
 import qualified Data.UUID as UUID
@@ -97,3 +98,26 @@ instance Csv.FromRecord Release where
                 <*> v .! 3
                 <*> v .! 4
     | otherwise = mzero
+
+-- instance Deserializeable ShowInfoResp where
+--   parser =
+--     e2err =<< convertPairs
+--               . HM.fromList <$> parsePairs
+--     where
+--       parsePairs :: Parser [(Text, Text)]
+--       parsePairs =
+--         parsePair `sepBy` endOfLine
+--       parsePair =
+--         liftA2 (,) parseKey parseValue
+--       parseKey =
+--         takeTill (==':') <* kvSep
+--       kvSep = string ": "
+--       parseValue = takeTill isEndOfLine
+
+openSocket :: FilePath -> IO NS.Socket
+openSocket p = do
+  sock <- NS.socket NS.AF_UNIX NS.Stream NS.defaultProtocol
+  NS.connect sock sockAddr
+  return sock
+  where
+    sockAddr = NS.SockAddrUnix p
