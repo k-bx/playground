@@ -2,6 +2,8 @@
 
 module Main where
 
+import Data.Aeson (FromJSON(..), Value(..), (.:))
+import Data.Aeson.Types (typeMismatch)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUIDv4
 import Control.Monad.Logger
@@ -52,3 +54,27 @@ offsetCurrentTime offset =
 
 textUuid :: IO T.Text
 textUuid = fmap (T.pack . UUID.toString) UUIDv4.nextRandom
+
+-- parseJSON :: Value -> Parser a
+-- (.:) :: FromJSON a
+--      => Object
+--      -> Text
+--      -> Parser a
+
+data Payload =
+  Payload
+  { payloadFrom :: String
+  , payloadTo :: String
+  , payloadSubject :: String
+  , payloadBody :: String
+  , payloadOffsetSeconds :: Int
+  }
+
+instance FromJSON Payload where
+  parseJSON (Object v) =
+    Payload <$> v .: "from"
+            <*> v .: "to"
+            <*> v .: "subject"
+            <*> v .: "body"
+            <*> v .: "offset_seconds"
+  parseJSON v = typeMismatch "Payload" v

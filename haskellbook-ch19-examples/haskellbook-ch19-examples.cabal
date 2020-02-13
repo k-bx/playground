@@ -28,3 +28,4 @@ executable haskellbook-ch19-examples
                      , bytestring
                      , time
                      , uuid
+                     , aeson
