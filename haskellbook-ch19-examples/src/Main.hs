@@ -1,10 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Main where
 
+import GHC.Generics
 import qualified Network.Socket as NS
-import Data.Aeson (FromJSON(..), Value(..), (.:))
+import Data.Aeson (FromJSON(..), ToJSON(..), Value(..), (.:), (.=))
 import Data.Aeson.Types (typeMismatch)
+import qualified Data.Aeson as J
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUIDv4
 import Control.Monad.Logger
@@ -77,13 +80,49 @@ data Payload =
   }
 
 instance FromJSON Payload where
-  parseJSON (Object v) =
-    Payload <$> v .: "from"
-            <*> v .: "to"
-            <*> v .: "subject"
-            <*> v .: "body"
-            <*> v .: "offset_seconds"
-  parseJSON v = typeMismatch "Payload" v
+  -- parseJSON (Object v) =
+  parseJSON =
+    J.withObject "Payload" $ \v ->
+      Payload <$> v .: "from"
+              <*> v .: "to"
+              <*> v .: "subject"
+              <*> v .: "body"
+              <*> v .: "offset_seconds"
+  -- parseJSON v = typeMismatch "Payload" v
+
+instance ToJSON Payload where
+  toJSON payload =
+    J.object
+      [ "from" .= payloadFrom payload
+      , "to" .= payloadTo payload
+      , "subject" .= payloadSubject payload
+      , "body" .= payloadBody payload
+      , "offset_seconds" .= payloadOffsetSeconds payload
+      ]
+
+data Payload' =
+  Payload'
+  { payload'From :: String
+  , payload'To :: String
+  , payload'Subject :: String
+  , payload'Body :: String
+  , payload'OffsetSeconds :: Int
+  }
+  deriving (Generic)
+
+-- options to cut out prefix of length N and convert to snake_case
+jsonOpts :: Int -> J.Options
+jsonOpts n =
+  J.defaultOptions
+    { J.fieldLabelModifier = J.camelTo2 '_' . drop n
+    , J.constructorTagModifier = J.camelTo2 '_' . drop n
+    }
+
+instance FromJSON Payload' where
+  parseJSON = J.genericParseJSON (jsonOpts 8)
+
+instance ToJSON Payload' where
+  toEncoding = J.genericToEncoding (jsonOpts 8)
 
 -- parseRecord :: Record -> Parser a
 
