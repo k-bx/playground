@@ -1,7 +1,8 @@
 use actix_web::{middleware, post, web, App, HttpRequest, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::sync::Mutex;
+// use std::sync::Mutex;
+use tokio::sync::Mutex;
 
 #[post("/api/test1.json")]
 async fn test1(req: HttpRequest) -> impl Responder {
@@ -44,7 +45,7 @@ struct Test4Resp {
 #[post("/api/test4.json")]
 async fn test4(env: web::Data<Env>) -> web::Json<Test4Resp> {
     let app_name = env.app_name.clone();
-    let mut counter = env.counter.lock().unwrap();
+    let mut counter = env.counter.lock().await;
     *counter += 1;
 
     web::Json(Test4Resp {
