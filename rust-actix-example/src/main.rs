@@ -4,6 +4,7 @@ use std::env;
 // use std::sync::Mutex;
 // use tokio::sync::Mutex;
 use async_std::sync::Arc;
+use reqwest::Client;
 use tokio::sync::RwLock;
 
 #[post("/api/test1.json")]
@@ -60,10 +61,43 @@ async fn test4(env: web::Data<Env>) -> web::Json<Test4Resp> {
     })
 }
 
+#[post("/api/test_make_req.json")]
+async fn test_make_req(env: web::Data<Env>) -> actix_web::Result<web::Json<serde_json::Value>> {
+    let rsp = env
+        .req
+        .post("https://httpbin.org/post")
+        .body("some body")
+        .send()
+        .await
+        .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let rsp_json = rsp
+        .json()
+        .await
+        .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(web::Json(rsp_json))
+}
+
+// struct AppError {
+//     kind: String,
+//     message: String,
+// }
+
+// impl From<std::io::Error> for AppError {
+//     fn from(error: std::io::Error) -> Self {
+//         AppError {
+//             kind: String::from("io"),
+//             message: error.to_string(),
+//         }
+//     }
+// }
+
+// impl actix_web::ResponseError for reqwest::Error {}
+
 struct Env {
     app_name: String,
     counter: Arc<RwLock<u64>>,
     counter2: RwLock<u64>,
+    req: Client,
 }
 
 #[actix_rt::main]
@@ -88,11 +122,16 @@ async fn main() -> std::io::Result<()> {
                 app_name: String::from("kon-test"),
                 counter: counter.clone(),
                 counter2: RwLock::new(0),
+                req: reqwest::Client::builder()
+                    .timeout(core::time::Duration::from_millis(1000))
+                    .build()
+                    .unwrap(),
             })
             .service(test1)
             .service(test2)
             .service(test3)
             .service(test4)
+            .service(test_make_req)
     })
     .bind("127.0.0.1:8080")?
     .run()
