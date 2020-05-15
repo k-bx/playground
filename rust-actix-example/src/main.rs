@@ -77,22 +77,6 @@ async fn test_make_req(env: web::Data<Env>) -> actix_web::Result<web::Json<serde
     Ok(web::Json(rsp_json))
 }
 
-// struct AppError {
-//     kind: String,
-//     message: String,
-// }
-
-// impl From<std::io::Error> for AppError {
-//     fn from(error: std::io::Error) -> Self {
-//         AppError {
-//             kind: String::from("io"),
-//             message: error.to_string(),
-//         }
-//     }
-// }
-
-// impl actix_web::ResponseError for reqwest::Error {}
-
 struct Env {
     app_name: String,
     counter: Arc<RwLock<u64>>,
@@ -106,18 +90,11 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     let counter = Arc::new(RwLock::new(0));
-    // let env = Env {
-    //     app_name: String::from("kon-test"),
-    //     counter: ,
-    //     counter2: RwLock::new(0),
-    // };
-    // let env_data = web::Data::new(env);
 
     HttpServer::new(move || {
         App::new()
             // enable logger - always register actix-web Logger middleware last
             .wrap(middleware::Logger::default())
-            // .app_data(env_data.clone())
             .data(Env {
                 app_name: String::from("kon-test"),
                 counter: counter.clone(),
