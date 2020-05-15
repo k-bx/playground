@@ -2,7 +2,8 @@ use actix_web::{middleware, post, web, App, HttpRequest, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use std::env;
 // use std::sync::Mutex;
-use tokio::sync::Mutex;
+// use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 
 #[post("/api/test1.json")]
 async fn test1(req: HttpRequest) -> impl Responder {
@@ -45,7 +46,7 @@ struct Test4Resp {
 #[post("/api/test4.json")]
 async fn test4(env: web::Data<Env>) -> web::Json<Test4Resp> {
     let app_name = env.app_name.clone();
-    let mut counter = env.counter.lock().await;
+    let mut counter = env.counter.write().await;
     *counter += 1;
 
     web::Json(Test4Resp {
@@ -56,7 +57,7 @@ async fn test4(env: web::Data<Env>) -> web::Json<Test4Resp> {
 
 struct Env {
     app_name: String,
-    counter: Mutex<u64>,
+    counter: RwLock<u64>,
 }
 
 #[actix_rt::main]
@@ -66,7 +67,7 @@ async fn main() -> std::io::Result<()> {
 
     let env = Env {
         app_name: String::from("kon-test"),
-        counter: Mutex::new(0),
+        counter: RwLock::new(0),
     };
     let env_data = web::Data::new(env);
 
